@@ -114,11 +114,12 @@ public class Main {
 
             List<Character> array = new ArrayList<Character>();
             for (int i = 0; i < 1024; i++) { // array 크기를 적절히 설정
-                array.add(null); // 초기값 설정
+                array.add('0'); // 초기값 설정
             }
             Scanner sc = new Scanner(System.in);
 
-            for (String line : list) {
+            for (int i = 0; i < list.size(); i++) {
+                String line = list.get(i);
                 if (line.startsWith("더러러러")) {
                     if (line.startsWith("더러러러 ")) {
                         String line2 = line.substring(5);
@@ -167,8 +168,8 @@ public class Main {
                         String scan = sc.nextLine();
                         char[] tokens = scan.toCharArray();
 
-                        for (int i = exclamationsBefore; i <= exclamationsAfter; i++) {
-                            array.set(i, tokens[i-exclamationsBefore]);
+                        for (int j = exclamationsBefore; j <= exclamationsAfter; j++) {
+                            array.set(j, tokens[j-exclamationsBefore]);
                         }
 
                         System.out.println(array);
@@ -221,8 +222,8 @@ public class Main {
                         System.out.println("~ 앞에 있는 !의 개수: " + exclamationsBefore);
                         System.out.println("~ 뒤에 있는 !의 개수: " + exclamationsAfter);
 
-                        for (int i = exclamationsBefore; i <= exclamationsAfter; i++) {
-                            array.set(i, null);
+                        for (int j = exclamationsBefore; j <= exclamationsAfter; j++) {
+                            array.set(j, '0');
                         }
 
                         System.out.println(array);
@@ -253,6 +254,61 @@ public class Main {
 
                     System.out.println(array);
                 } else if (line.startsWith("쿵")) {
+                    if (line.startsWith("쿵 얼씨구")) {
+                        if (line.startsWith("쿵 얼씨구 ")) {
+                            String line2 = line.substring(1);
+
+                            int number = 0;
+                            boolean hasOtherCharacters = false;
+
+                            for (char c : line2.toCharArray()) {
+                                if (c == '!') {
+                                    number++;
+                                } else if (c == '~') {
+                                    number--;
+                                } else {
+                                    hasOtherCharacters = true;
+                                }
+                            }
+
+                            if (hasOtherCharacters) {
+                                System.out.println("Invalid command: " + line);
+                                return;
+                            }
+
+                            array.set(0, (char) number);
+
+                            System.out.println(array);
+                        } else {
+                            System.out.println("Invalid command: " + line);
+                            return;
+                        }
+                    } else {
+                        String line2 = line.substring(1);
+
+                        int number = 0;
+                        boolean hasOtherCharacters = false;
+
+                        for (char c : line2.toCharArray()) {
+                            if (c == '!') {
+                                number++;
+                            } else if (c == '~') {
+                                number--;
+                            } else {
+                                hasOtherCharacters = true;
+                            }
+                        }
+
+                        if (hasOtherCharacters) {
+                            System.out.println("Invalid command: " + line);
+                            return;
+                        }
+
+                        array.set(0, Integer.toString(number).charAt(0));
+
+                        System.out.println(array);
+                    }
+                } else if (line.startsWith("덕")) {
                     String line2 = line.substring(1);
 
                     int number = 0;
@@ -273,14 +329,95 @@ public class Main {
                         return;
                     }
 
-                    array.set(0, Integer.toString(number).charAt(0));
+                    System.out.println(array.get(number));
+                } else if (line.startsWith("기덕")) {
+                    String line2 = line.substring(2);
 
+                    int number = 0;
+                    boolean hasOtherCharacters = false;
+
+                    for (char c : line2.toCharArray()) {
+                        if (c == '!') {
+                            number++;
+                        } else if (c == '~') {
+                            number--;
+                        } else {
+                            hasOtherCharacters = true;
+                        }
+                    }
+
+                    if (hasOtherCharacters) {
+                        System.out.println("Invalid command: " + line);
+                        return;
+                    }
+
+                    array.set(0, array.get(number));
                     System.out.println(array);
+                } else if (line.startsWith("얼쑤")) {
+                    String line2 = line.substring(2);
+
+                    int number = 0;
+                    boolean hasOtherCharacters = false;
+
+                    for (char c : line2.toCharArray()) {
+                        if (c == '!') {
+                            number++;
+                        } else if (c == '~') {
+                            number--;
+                        } else {
+                            hasOtherCharacters = true;
+                        }
+                    }
+
+                    if (hasOtherCharacters) {
+                        System.out.println("Invalid command: " + line);
+                        return;
+                    }
+
+                    if (array.get(number) == '0') {
+                        while (true) {
+                            if (!list.get(i).equals("잘한다")) {
+                                i++;
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                } else if (line.startsWith("잘한다")) {
+                    int j = 0;
+                    while (true) {
+                        if (!list.get(i).startsWith("얼쑤")) {
+                            i--;
+                            if (list.get(i).equals("잘한다")) {
+                                j++;
+                            }
+                        } else if (j != 0) {
+                            j--;
+                            i--;
+                        } else {
+                            i--;
+                            break;
+                        }
+                    }
+                } else if (line.startsWith("에헤라디야")) {
+                    int j = 0;
+                    while (true) {
+                        if (!list.get(i).startsWith("잘한다")) {
+                            i++;
+                            if (list.get(i).equals("얼쑤")) {
+                                j++;
+                            }
+                        } else if (j != 0) {
+                            j--;
+                            i++;
+                        } else {
+                            break;
+                        }
+                    }
                 }
+                // 좋다 빼고 완성
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (URISyntaxException e) {
+        } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
         }
     }
