@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -85,6 +83,8 @@ import java.util.Scanner;
 //이 코드에서는 얼씨구 명령어가 문자를 나타내며, 이를 쿵 명령어와 함께 사용하여 0번 스택의 값을 문자로 대체합니다. 잘한다는 반복문의 끝을 나타내며, 허먼은 반복문을 강제 종료하는 데 사용됩니다.
 
 public class Main {
+    static boolean debug = false;
+
     public static void main(String[] args) {
         try {
             // Main 클래스의 경로를 URL에서 파일 객체로 변환
@@ -96,30 +96,33 @@ public class Main {
             // 기준 경로를 바탕으로 상대 경로를 합쳐 새로운 파일 객체 생성
             File file = new File(classPath.toFile(), "org/chris/jangguLang/code/main.jangguLang");
 
-            // 파일 존재 여부 확인
-            if (file.exists()) {
-                System.out.println("파일이 존재합니다: " + file.getAbsolutePath());
-            } else {
-                System.out.println("파일이 존재하지 않습니다.");
-                return;
+            if (debug) {
+                // 파일 존재 여부 확인
+                if (file.exists()) {
+                    System.out.println("파일이 존재합니다: " + file.getAbsolutePath());
+                } else {
+                    System.out.println("파일이 존재하지 않습니다.");
+                    return;
+                }
             }
 
             // 파일의 모든 내용을 바이트 배열로 읽어오기
             List<String> list = Files.readAllLines(file.toPath());
 
-            // 파일 내용 출력
-            for (String line : list) {
-                System.out.println(line);
+            if (debug) {
+                // 파일 내용 출력
+                for (String line : list) {
+                    System.out.println(line);
+                }
             }
 
-            List<Character> array = new ArrayList<Character>();
-            for (int i = 0; i < 1024; i++) { // array 크기를 적절히 설정
-                array.add('0'); // 초기값 설정
-            }
+            JangguList array = new JangguList();
             Scanner sc = new Scanner(System.in);
 
             for (int i = 0; i < list.size(); i++) {
                 String line = list.get(i);
+                line = removeComment(line);
+
                 if (line.startsWith("더러러러")) {
                     if (line.startsWith("더러러러 ")) {
                         String line2 = line.substring(5);
@@ -162,8 +165,10 @@ public class Main {
                             return;
                         }
 
-                        System.out.println("~ 앞에 있는 !의 개수: " + exclamationsBefore);
-                        System.out.println("~ 뒤에 있는 !의 개수: " + exclamationsAfter);
+                        if (debug) {
+                            System.out.println("~ 앞에 있는 !의 개수: " + exclamationsBefore);
+                            System.out.println("~ 뒤에 있는 !의 개수: " + exclamationsAfter);
+                        }
 
                         String scan = sc.nextLine();
                         char[] tokens = scan.toCharArray();
@@ -172,7 +177,9 @@ public class Main {
                             array.set(j, tokens[j-exclamationsBefore]);
                         }
 
-                        System.out.println(array);
+                        if (debug) {
+                            System.out.println(array);
+                        }
                     } else {
                         System.out.println("Invalid command: " + line);
                         return;
@@ -219,14 +226,18 @@ public class Main {
                             return;
                         }
 
-                        System.out.println("~ 앞에 있는 !의 개수: " + exclamationsBefore);
-                        System.out.println("~ 뒤에 있는 !의 개수: " + exclamationsAfter);
+                        if (debug) {
+                            System.out.println("~ 앞에 있는 !의 개수: " + exclamationsBefore);
+                            System.out.println("~ 뒤에 있는 !의 개수: " + exclamationsAfter);
+                        }
 
                         for (int j = exclamationsBefore; j <= exclamationsAfter; j++) {
                             array.set(j, '0');
                         }
 
-                        System.out.println(array);
+                        if (debug) {
+                            System.out.println(array);
+                        }
                     } else {
                         System.out.println("Invalid command: " + line);
                         return;
@@ -252,7 +263,9 @@ public class Main {
 
                     array.set(number, array.get(0));
 
-                    System.out.println(array);
+                    if (debug) {
+                        System.out.println(array);
+                    }
                 } else if (line.startsWith("쿵")) {
                     if (line.startsWith("쿵 얼씨구")) {
                         if (line.startsWith("쿵 얼씨구 ")) {
@@ -278,7 +291,9 @@ public class Main {
 
                             array.set(0, (char) number);
 
-                            System.out.println(array);
+                            if (debug) {
+                                System.out.println(array);
+                            }
                         } else {
                             System.out.println("Invalid command: " + line);
                             return;
@@ -306,7 +321,9 @@ public class Main {
 
                         array.set(0, Integer.toString(number).charAt(0));
 
-                        System.out.println(array);
+                        if (debug) {
+                            System.out.println(array);
+                        }
                     }
                 } else if (line.startsWith("덕")) {
                     String line2 = line.substring(1);
@@ -329,7 +346,9 @@ public class Main {
                         return;
                     }
 
-                    System.out.println(array.get(number));
+                    Object element = array.get(number);
+                    char ch = (char) ((int) element);
+                    System.out.println(array.isIndexChar(number)?ch:element);
                 } else if (line.startsWith("기덕")) {
                     String line2 = line.substring(2);
 
@@ -352,7 +371,9 @@ public class Main {
                     }
 
                     array.set(0, array.get(number));
-                    System.out.println(array);
+                    if (debug) {
+                        System.out.println(array);
+                    }
                 } else if (line.startsWith("얼쑤")) {
                     String line2 = line.substring(2);
 
@@ -374,7 +395,7 @@ public class Main {
                         return;
                     }
 
-                    if (array.get(number) == '0') {
+                    if ((int) array.get(number) == 0) {
                         while (true) {
                             if (!list.get(i).equals("잘한다")) {
                                 i++;
@@ -415,10 +436,18 @@ public class Main {
                         }
                     }
                 }
-                // 좋다 빼고 완성
+                // 좋다랑 // 빼고 완성
             }
         } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
         }
+    }
+
+    public static String removeComment(String str) {
+        int index = str.indexOf("//");
+        if (index != -1) {
+            return str.substring(0, index).trim();  // "//" 이전 부분만 자르고 공백 제거
+        }
+        return str;  // "//"가 없을 경우 원본 문자열 반환
     }
 }
