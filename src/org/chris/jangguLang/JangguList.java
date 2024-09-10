@@ -55,4 +55,21 @@ public class JangguList {
         }
         return oldElement;
     }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for (int i = 0; i < 1024; i++) {
+            if (isCharList.get(i)) {
+                sb.append(charList.get(i));
+            } else {
+                sb.append(intList.get(i));
+            }
+            if (i < 1023) {
+                sb.append(", ");
+            }
+        }
+        sb.append("]");
+        return sb.toString();
+    }
 }

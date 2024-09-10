@@ -139,24 +139,16 @@ public class Main {
                         }
 
                         if (parts.length > 0) {
-                            // '~' 앞의 부분에서 '!' 개수 세기
-                            for (char c : parts[0].toCharArray()) {
-                                if (c == '!') {
-                                    exclamationsBefore++;
-                                } else {
-                                    hasOtherCharacters = true;
-                                }
+                            exclamationsBefore = countNumber(parts[0]);
+                            if (exclamationsBefore == -1) {
+                                hasOtherCharacters = true;
                             }
                         }
 
                         if (parts.length > 1) {
-                            // '~' 뒤의 부분에서 '!' 개수 세기
-                            for (char c : parts[1].toCharArray()) {
-                                if (c == '!') {
-                                    exclamationsAfter++;
-                                } else {
-                                    hasOtherCharacters = true;
-                                }
+                            exclamationsAfter = countNumber(parts[1]);
+                            if (exclamationsAfter == -1) {
+                                hasOtherCharacters = true;
                             }
                         }
 
@@ -200,24 +192,16 @@ public class Main {
                         }
 
                         if (parts.length > 0) {
-                            // '~' 앞의 부분에서 '!' 개수 세기
-                            for (char c : parts[0].toCharArray()) {
-                                if (c == '!') {
-                                    exclamationsBefore++;
-                                } else {
-                                    hasOtherCharacters = true;
-                                }
+                            exclamationsBefore = countNumber(parts[0]);
+                            if (exclamationsBefore == -1) {
+                                hasOtherCharacters = true;
                             }
                         }
 
                         if (parts.length > 1) {
-                            // '~' 뒤의 부분에서 '!' 개수 세기
-                            for (char c : parts[1].toCharArray()) {
-                                if (c == '!') {
-                                    exclamationsAfter++;
-                                } else {
-                                    hasOtherCharacters = true;
-                                }
+                            exclamationsAfter = countNumber(parts[1]);
+                            if (exclamationsAfter == -1) {
+                                hasOtherCharacters = true;
                             }
                         }
 
@@ -248,12 +232,9 @@ public class Main {
                     int number = 0;
                     boolean hasOtherCharacters = false;
 
-                    for (char c : line2.toCharArray()) {
-                        if (c == '!') {
-                            number++;
-                        } else {
-                            hasOtherCharacters = true;
-                        }
+                    number = countNumber(line2);
+                    if (number == -1) {
+                        hasOtherCharacters = true;
                     }
 
                     if (hasOtherCharacters) {
@@ -261,7 +242,8 @@ public class Main {
                         return;
                     }
 
-                    array.set(number, array.get(0));
+                    Object element = array.get(0);
+                    array.set(number, array.isIndexChar(0)?(char) ((int) element):element);
 
                     if (debug) {
                         System.out.println(array);
@@ -269,19 +251,14 @@ public class Main {
                 } else if (line.startsWith("쿵")) {
                     if (line.startsWith("쿵 얼씨구")) {
                         if (line.startsWith("쿵 얼씨구 ")) {
-                            String line2 = line.substring(1);
+                            String line2 = line.substring(5);
 
                             int number = 0;
                             boolean hasOtherCharacters = false;
 
-                            for (char c : line2.toCharArray()) {
-                                if (c == '!') {
-                                    number++;
-                                } else if (c == '~') {
-                                    number--;
-                                } else {
-                                    hasOtherCharacters = true;
-                                }
+                            number = countNumber(line2);
+                            if (number == -1) {
+                                hasOtherCharacters = true;
                             }
 
                             if (hasOtherCharacters) {
@@ -304,14 +281,9 @@ public class Main {
                         int number = 0;
                         boolean hasOtherCharacters = false;
 
-                        for (char c : line2.toCharArray()) {
-                            if (c == '!') {
-                                number++;
-                            } else if (c == '~') {
-                                number--;
-                            } else {
-                                hasOtherCharacters = true;
-                            }
+                        number = countNumber(line2);
+                        if (number == -1) {
+                            hasOtherCharacters = true;
                         }
 
                         if (hasOtherCharacters) {
@@ -319,7 +291,7 @@ public class Main {
                             return;
                         }
 
-                        array.set(0, Integer.toString(number).charAt(0));
+                        array.set(0, number);
 
                         if (debug) {
                             System.out.println(array);
@@ -331,14 +303,9 @@ public class Main {
                     int number = 0;
                     boolean hasOtherCharacters = false;
 
-                    for (char c : line2.toCharArray()) {
-                        if (c == '!') {
-                            number++;
-                        } else if (c == '~') {
-                            number--;
-                        } else {
-                            hasOtherCharacters = true;
-                        }
+                    number = countNumber(line2);
+                    if (number == -1) {
+                        hasOtherCharacters = true;
                     }
 
                     if (hasOtherCharacters) {
@@ -355,14 +322,9 @@ public class Main {
                     int number = 0;
                     boolean hasOtherCharacters = false;
 
-                    for (char c : line2.toCharArray()) {
-                        if (c == '!') {
-                            number++;
-                        } else if (c == '~') {
-                            number--;
-                        } else {
-                            hasOtherCharacters = true;
-                        }
+                    number = countNumber(line2);
+                    if (number == -1) {
+                        hasOtherCharacters = true;
                     }
 
                     if (hasOtherCharacters) {
@@ -380,14 +342,9 @@ public class Main {
                     int number = 0;
                     boolean hasOtherCharacters = false;
 
-                    for (char c : line2.toCharArray()) {
-                        if (c == '!') {
-                            number++;
-                        } else if (c == '~') {
-                            number--;
-                        } else {
-                            hasOtherCharacters = true;
-                        }
+                    number = countNumber(line2);
+                    if (number == -1) {
+                        hasOtherCharacters = true;
                     }
 
                     if (hasOtherCharacters) {
@@ -395,7 +352,7 @@ public class Main {
                         return;
                     }
 
-                    if ((int) array.get(number) == 0) {
+                    if (((int) array.get(number)) == 0) {
                         while (true) {
                             if (!list.get(i).equals("잘한다")) {
                                 i++;
@@ -436,11 +393,40 @@ public class Main {
                         }
                     }
                 }
-                // 좋다랑 // 빼고 완성
+                // 좋다 빼고 완성
             }
         } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
         }
+    }
+
+    public static int countNumber(String s) {
+        int number = 0;
+        if (s.startsWith(" 좋") && s.endsWith("다")) {
+            s = s.substring(2, s.length() - 1);
+            String[] parts = s.split(" ");
+            for (String part : parts) {
+                number *= 10;
+                if (!part.equals("~")) {
+                    for (char c : part.toCharArray()) {
+                        if (c == '!') {
+                            number++;
+                        } else {
+                            return -1;
+                        }
+                    }
+                }
+            }
+        } else {
+            for (char c : s.toCharArray()) {
+                if (c == '!') {
+                    number++;
+                } else {
+                    return -1;
+                }
+            }
+        }
+        return number;
     }
 
     public static String removeComment(String str) {
