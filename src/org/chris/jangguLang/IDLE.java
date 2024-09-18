@@ -1,6 +1,9 @@
 package org.chris.jangguLang;
 
 import javax.swing.*;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 import java.awt.*;
@@ -8,6 +11,7 @@ import java.io.*;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class IDLE {
     public static void main(String[] args) {
@@ -31,9 +35,9 @@ public class IDLE {
 
         // 파일 메뉴의 하위 항목 (코드 실행 항목 추가)
         JMenuItem item1 = new JMenuItem("열기");
-        JMenuItem item2 = new JMenuItem("저장");
-        JMenuItem item3 = new JMenuItem("새 파일");
-        JMenuItem item4 = new JMenuItem("코드 실행");  // 코드 실행 메뉴 추가
+        JMenuItem item2 = new JMenuItem("새 파일");
+        JMenuItem item3 = new JMenuItem("저장");
+        JMenuItem item4 = new JMenuItem("다른 이름으로 저장");
 
         // 메뉴 아이템 색상 설정
         for (JMenuItem item : new JMenuItem[]{item1, item2, item3, item4 }) {
@@ -47,6 +51,11 @@ public class IDLE {
         fileMenu.add(item3);
         fileMenu.add(item4);
         menuBar.add(fileMenu);
+
+        JMenu codeStartMenu = new JMenu("코드 실행");
+        codeStartMenu.setForeground(textColor);
+        menuBar.add(codeStartMenu);
+
         frame.setJMenuBar(menuBar);
 
         // 텍스트 입력을 위한 TextArea
@@ -96,72 +105,175 @@ public class IDLE {
         // 컴포넌트 배치
         frame.add(splitPane, BorderLayout.CENTER);
 
-        // 코드 실행 버튼 기능 추가
-        item4.addActionListener(e -> {
-            String code = textArea.getText();
-            try {
-                // Main 클래스의 경로를 URL에서 파일 객체로 변환
-                File classFile = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+        codeStartMenu.addMenuListener(new MenuListener() {
+            @Override
+            public void menuSelected(MenuEvent e) {
+                String code = textArea.getText();
+                outputTextArea.setText("");
+                try {
+                    // Main 클래스의 경로를 URL에서 파일 객체로 변환
+                    File classFile = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 
-                // 경로를 얻고 필요한 부분까지 잘라냄
-                Path classPath = classFile.toPath();
+                    // 경로를 얻고 필요한 부분까지 잘라냄
+                    Path classPath = classFile.toPath();
 
-                // 기준 경로를 바탕으로 상대 경로를 합쳐 새로운 파일 객체 생성
-                File file = new File(classPath.toFile(), "org/chris/jangguLang/code/main.jangguLang");
+                    // 기준 경로를 바탕으로 상대 경로를 합쳐 새로운 파일 객체 생성
+                    File file = new File(classPath.toFile(), "org/chris/jangguLang/code/main.jangguLang");
 
-                BufferedWriter fileWriter = new BufferedWriter(new FileWriter(file));
-                fileWriter.write(code);
-                fileWriter.flush();
-                fileWriter.close();
+                    BufferedWriter fileWriter = new BufferedWriter(new FileWriter(file));
+                    fileWriter.write(code);
+                    fileWriter.flush();
+                    fileWriter.close();
 
-                // 현재 실행 중인 클래스의 경로를 얻기
-                Path basePath = Paths.get(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+                    // 현재 실행 중인 클래스의 경로를 얻기
+                    Path basePath = Paths.get(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 
-                Process process = Runtime.getRuntime().exec("java -cp " + basePath + " org.chris.jangguLang.Main");
+                    Process process = Runtime.getRuntime().exec("java -cp " + basePath + " org.chris.jangguLang.Main");
 
-                // ErrorStream을 읽어서 에러 메시지를 확인
-                InputStream errorStream = process.getErrorStream();
-                BufferedReader errorReader = new BufferedReader(new InputStreamReader(errorStream));
-                String errorLine;
-                //while ((errorLine = errorReader.readLine()) != null) {
-                //    System.err.println("Error: " + errorLine);
-                //}
+                    // ErrorStream을 읽어서 에러 메시지를 확인
+                    InputStream errorStream = process.getErrorStream();
+                    BufferedReader errorReader = new BufferedReader(new InputStreamReader(errorStream));
+                    String errorLine;
+                    //while ((errorLine = errorReader.readLine()) != null) {
+                    //    System.err.println("Error: " + errorLine);
+                    //}
 
-                // 프로세스의 입력 스트림 및 출력 스트림 설정
-                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
+                    // 프로세스의 입력 스트림 및 출력 스트림 설정
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
 
-                // 스레드를 사용해 입력 스트림을 읽고 출력에 반영
-                new Thread(() -> {
-                    try {
-                        String line;
-                        StringBuilder output = new StringBuilder();
-                        while ((line = reader.readLine()) != null) {
-                            output.append(line).append("\n");
-                            outputTextArea.setText(output.toString());  // 출력 갱신
+                    // 스레드를 사용해 입력 스트림을 읽고 출력에 반영
+                    new Thread(() -> {
+                        try {
+                            String line;
+                            StringBuilder output = new StringBuilder();
+                            while ((line = reader.readLine()) != null) {
+                                output.append(line).append("\n");
+                                outputTextArea.setText(output.toString());  // 출력 갱신
+                            }
+                        } catch (IOException ex) {
+                            outputTextArea.setText("입력/출력 중 오류 발생: " + ex.getMessage());
                         }
-                    } catch (IOException ex) {
-                        outputTextArea.setText("입력/출력 중 오류 발생: " + ex.getMessage());
-                    }
-                }).start();
+                    }).start();
 
-                // 입력 필드에서 입력을 받을 때마다 프로세스에 전달
-                inputField.addActionListener(inputEvent -> {
-                    try {
-                        String userInput = inputField.getText();
-                        writer.write(userInput + "\n");  // 입력 값을 프로세스에 전달
-                        writer.flush();
-                        inputField.setText("");  // 입력 필드 비우기
-                    } catch (IOException ex) {
-                        outputTextArea.setText("입력 전달 중 오류 발생: " + ex.getMessage());
+                    // 입력 필드에서 입력을 받을 때마다 프로세스에 전달
+                    inputField.addActionListener(inputEvent -> {
+                        try {
+                            String userInput = inputField.getText();
+                            writer.write(userInput + "\n");  // 입력 값을 프로세스에 전달
+                            writer.flush();
+                            inputField.setText("");  // 입력 필드 비우기
+                        } catch (IOException ex) {
+                            outputTextArea.setText("입력 전달 중 오류 발생: " + ex.getMessage());
+                        }
+                    });
+                } catch (IOException | URISyntaxException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+
+            @Override
+            public void menuDeselected(MenuEvent e) {
+
+            }
+
+            @Override
+            public void menuCanceled(MenuEvent e) {
+
+            }
+        });
+
+        // JMenuItem item1 = new JMenuItem("열기");
+        // JMenuItem item2 = new JMenuItem("새 파일");
+        // JMenuItem item3 = new JMenuItem("저장");
+        // JMenuItem item4 = new JMenuItem("다른 이름으로 저장");
+        AtomicReference<File> fileRef = new AtomicReference<>(null);
+
+        item1.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+
+            // 파일 필터 추가
+            FileNameExtensionFilter filter = new FileNameExtensionFilter("JangguLang Code Files", "jangguLang");
+            fileChooser.setFileFilter(filter);
+
+            // 파일 선택 다이얼로그를 보여줍니다.
+            int result = fileChooser.showOpenDialog(frame);
+
+            // 파일을 선택했을 때 처리
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File file = fileChooser.getSelectedFile();
+                fileRef.set(file);
+                frame.setTitle("장구랭 - " + file.getName());
+                try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                    String line;
+                    StringBuilder content = new StringBuilder();
+
+                    // 파일의 모든 줄을 읽어 TextArea에 넣음
+                    while ((line = reader.readLine()) != null) {
+                        content.append(line).append("\n");
                     }
-                });
-            } catch (IOException | URISyntaxException ex) {
-                throw new RuntimeException(ex);
+                    textArea.setText(content.toString()); // TextArea에 텍스트 설정
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
+
+        item4.addActionListener(e -> {
+            File file1 = fileRef.get();
+            File file = anotherNameSave(textArea.getText(), frame, file1);
+            if (file == null) return;
+            frame.setTitle("장구랭 - " + file.getName());
+            fileRef.set(file);
+        });
+
+        item2.addActionListener(e -> {
+            fileRef.set(null);
+            frame.setTitle("장구랭");
+            textArea.setText("");
+        });
+
+        item3.addActionListener(e -> {
+            File file1 = fileRef.get();
+            if (file1 == null) {
+                File file = anotherNameSave(textArea.getText(), frame, null);
+                if (file == null) return;
+                frame.setTitle("장구랭 - " + file.getName());
+                fileRef.set(file);
+            } else {
+                // 파일을 저장(덮어쓰기 또는 새로 생성)
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter(file1))) {
+                    writer.write(textArea.getText()); // TextArea의 내용을 파일에 저장
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
             }
         });
 
         // 화면에 표시
         frame.setVisible(true);
+    }
+
+    private static File anotherNameSave(String code, Frame frame, File file) {
+        JFileChooser fileChooser = new JFileChooser();
+
+        if (file == null) fileChooser.setSelectedFile(new File("main.jangguLang"));
+        else fileChooser.setSelectedFile(file);
+
+        // 저장 다이얼로그를 열어서 새 파일을 지정하거나 기존 파일을 선택하게 함
+        int result = fileChooser.showSaveDialog(frame);
+
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File fileToSave = fileChooser.getSelectedFile();
+
+            // 파일을 저장(덮어쓰기 또는 새로 생성)
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileToSave))) {
+                writer.write(code); // TextArea의 내용을 파일에 저장
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+            return fileToSave;
+        }
+        return null;
     }
 }

@@ -354,7 +354,7 @@ public class Main {
 
                     if (((int) array.get(number)) == 0) {
                         while (true) {
-                            if (!list.get(i).equals("잘한다")) {
+                            if (!list.get(i).startsWith("잘한다")) {
                                 i++;
                             } else {
                                 break;
@@ -366,7 +366,7 @@ public class Main {
                     while (true) {
                         if (!list.get(i).startsWith("얼쑤")) {
                             i--;
-                            if (list.get(i).equals("잘한다")) {
+                            if (list.get(i).startsWith("잘한다")) {
                                 j++;
                             }
                         } else if (j != 0) {
@@ -382,7 +382,7 @@ public class Main {
                     while (true) {
                         if (!list.get(i).startsWith("잘한다")) {
                             i++;
-                            if (list.get(i).equals("얼쑤")) {
+                            if (list.get(i).startsWith("얼쑤")) {
                                 j++;
                             }
                         } else if (j != 0) {
