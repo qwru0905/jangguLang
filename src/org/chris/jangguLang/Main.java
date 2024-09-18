@@ -87,6 +87,7 @@ public class Main {
 
     public static void main(String[] args) {
         try {
+            /*
             // Main 클래스의 경로를 URL에서 파일 객체로 변환
             File classFile = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 
@@ -95,6 +96,9 @@ public class Main {
 
             // 기준 경로를 바탕으로 상대 경로를 합쳐 새로운 파일 객체 생성
             File file = new File(classPath.toFile(), "org/chris/jangguLang/code/main.jangguLang");
+            */
+
+            File file = new File("C:\\Users\\qwru0\\AppData\\Local\\JangguLang\\main.jangguLang");
 
             if (debug) {
                 // 파일 존재 여부 확인
@@ -395,7 +399,7 @@ public class Main {
                 }
                 // 좋다 빼고 완성
             }
-        } catch (IOException | URISyntaxException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

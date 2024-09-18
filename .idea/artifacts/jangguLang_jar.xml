@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="jangguLang:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/jangguLang_jar</output-path>
+    <root id="archive" name="jangguLang.jar">
+      <element id="module-output" name="jangguLang" />
+    </root>
+  </artifact>
+</component>

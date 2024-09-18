@@ -111,6 +111,7 @@ public class IDLE {
                 String code = textArea.getText();
                 outputTextArea.setText("");
                 try {
+                    /*
                     // Main 클래스의 경로를 URL에서 파일 객체로 변환
                     File classFile = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 
@@ -119,6 +120,20 @@ public class IDLE {
 
                     // 기준 경로를 바탕으로 상대 경로를 합쳐 새로운 파일 객체 생성
                     File file = new File(classPath.toFile(), "org/chris/jangguLang/code/main.jangguLang");
+                    */
+
+                    File file = new File("C:\\Users\\qwru0\\AppData\\Local\\JangguLang\\main.jangguLang");
+
+                    // 디렉토리가 존재하는지 확인하고 없으면 생성
+                    File parentDir = file.getParentFile();
+                    if (!parentDir.exists()) {
+                        parentDir.mkdirs();
+                    }
+
+                    // 파일이 존재하지 않으면 새로 생성
+                    if (!file.exists()) {
+                        file.createNewFile();
+                    }
 
                     BufferedWriter fileWriter = new BufferedWriter(new FileWriter(file));
                     fileWriter.write(code);
