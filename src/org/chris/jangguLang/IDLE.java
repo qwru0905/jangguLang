@@ -110,81 +110,9 @@ public class IDLE {
             public void menuSelected(MenuEvent e) {
                 String code = textArea.getText();
                 outputTextArea.setText("");
-                try {
-                    /*
-                    // Main 클래스의 경로를 URL에서 파일 객체로 변환
-                    File classFile = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-
-                    // 경로를 얻고 필요한 부분까지 잘라냄
-                    Path classPath = classFile.toPath();
-
-                    // 기준 경로를 바탕으로 상대 경로를 합쳐 새로운 파일 객체 생성
-                    File file = new File(classPath.toFile(), "org/chris/jangguLang/code/main.jangguLang");
-                    */
-
-                    File file = new File("C:\\Users\\qwru0\\AppData\\Local\\JangguLang\\main.jangguLang");
-
-                    // 디렉토리가 존재하는지 확인하고 없으면 생성
-                    File parentDir = file.getParentFile();
-                    if (!parentDir.exists()) {
-                        parentDir.mkdirs();
-                    }
-
-                    // 파일이 존재하지 않으면 새로 생성
-                    if (!file.exists()) {
-                        file.createNewFile();
-                    }
-
-                    BufferedWriter fileWriter = new BufferedWriter(new FileWriter(file));
-                    fileWriter.write(code);
-                    fileWriter.flush();
-                    fileWriter.close();
-
-                    // 현재 실행 중인 클래스의 경로를 얻기
-                    Path basePath = Paths.get(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-
-                    Process process = Runtime.getRuntime().exec("java -cp " + basePath + " org.chris.jangguLang.Main");
-
-                    // ErrorStream을 읽어서 에러 메시지를 확인
-                    InputStream errorStream = process.getErrorStream();
-                    BufferedReader errorReader = new BufferedReader(new InputStreamReader(errorStream));
-                    String errorLine;
-                    //while ((errorLine = errorReader.readLine()) != null) {
-                    //    System.err.println("Error: " + errorLine);
-                    //}
-
-                    // 프로세스의 입력 스트림 및 출력 스트림 설정
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
-
-                    // 스레드를 사용해 입력 스트림을 읽고 출력에 반영
-                    new Thread(() -> {
-                        try {
-                            String line;
-                            StringBuilder output = new StringBuilder();
-                            while ((line = reader.readLine()) != null) {
-                                output.append(line).append("\n");
-                                outputTextArea.setText(output.toString());  // 출력 갱신
-                            }
-                        } catch (IOException ex) {
-                            outputTextArea.setText("입력/출력 중 오류 발생: " + ex.getMessage());
-                        }
-                    }).start();
-
-                    // 입력 필드에서 입력을 받을 때마다 프로세스에 전달
-                    inputField.addActionListener(inputEvent -> {
-                        try {
-                            String userInput = inputField.getText();
-                            writer.write(userInput + "\n");  // 입력 값을 프로세스에 전달
-                            writer.flush();
-                            inputField.setText("");  // 입력 필드 비우기
-                        } catch (IOException ex) {
-                            outputTextArea.setText("입력 전달 중 오류 발생: " + ex.getMessage());
-                        }
-                    });
-                } catch (IOException | URISyntaxException ex) {
-                    throw new RuntimeException(ex);
-                }
+                InputOutputHandler ioHandler = new GUIIOHandler(inputField, outputTextArea);
+                CodeExcuter excuter = new CodeExcuter(ioHandler);
+                excuter.codeExecute(code);
             }
 
             @Override
