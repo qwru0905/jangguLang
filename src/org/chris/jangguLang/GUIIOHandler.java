@@ -1,34 +1,50 @@
 package org.chris.jangguLang;
 
 import javax.swing.*;
+import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
+import java.awt.*;
 
-public class GUIIOHandler implements InputOutputHandler {
+public class GUIIOHandler extends Thread implements InputOutputHandler {
     private JTextField inputField;
-    private JTextArea outputArea;
-    private String input = null;
+    private JTextPane outputArea; // JTextArea 대신 JTextPane 사용
+    private volatile String input = null;
 
-    public GUIIOHandler(JTextField inputField, JTextArea outputArea) {
+    public GUIIOHandler(JTextField inputField, JTextPane outputArea) {
         this.inputField = inputField;
         this.outputArea = outputArea;
 
         // ActionListener로 Enter 키를 누를 때 입력 처리
         inputField.addActionListener(e -> {
-            synchronized (this) {
-                input = inputField.getText();  // 입력된 텍스트를 가져옴
-                inputField.setText("");        // 입력 필드를 초기화
-                notify();                      // 대기 중인 스레드를 깨움
-            }
+            // 비동기로 입력 처리
+            handleInput();
         });
+    }
+
+    private void handleInput() {
+        appendOutput(inputField.getText() + "\n", Color.GREEN);
+        input = inputField.getText();
+        inputField.setText("");
+    }
+
+    private void appendOutput(String message, Color color) {
+        StyledDocument doc = outputArea.getStyledDocument();
+        Style style = outputArea.addStyle("Style", null);
+        StyleConstants.setForeground(style, color);
+
+        try {
+            // 이전 메시지와 연결하여 한 줄로 이어 붙입니다.
+            doc.insertString(doc.getLength(), message, style);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public String getInput() {
         while (input == null) {
-            try {
-                wait();  // Enter 키 입력이 될 때까지 대기
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            onSpinWait();
         }
         String result = input;  // 입력된 값을 반환
         input = null;           // 다음 입력을 위해 초기화
@@ -37,6 +53,6 @@ public class GUIIOHandler implements InputOutputHandler {
 
     @Override
     public void printOutput(String output) {
-        outputArea.append(output);
+        appendOutput(output, Color.WHITE); // 기본 출력은 검정색으로
     }
 }

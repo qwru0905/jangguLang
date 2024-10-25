@@ -1,10 +1,8 @@
 package org.chris.jangguLang;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
-public class CodeExcuter {
+public class CodeExcuter extends Thread {
     private InputOutputHandler ioHandler;
     private final boolean debug;
     

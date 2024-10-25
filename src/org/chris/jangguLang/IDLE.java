@@ -4,13 +4,8 @@ import javax.swing.*;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.tools.JavaCompiler;
-import javax.tools.ToolProvider;
 import java.awt.*;
 import java.io.*;
-import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class IDLE {
@@ -20,6 +15,7 @@ public class IDLE {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(600, 400);
         frame.setLayout(new BorderLayout());
+        frame.setLocationRelativeTo(null);
 
         // 다크모드 색상 설정
         Color bgColor = new Color(45, 45, 45);  // 어두운 배경색
@@ -76,7 +72,7 @@ public class IDLE {
         outputTitle.setBorder(BorderFactory.createLineBorder(textColor));
 
         // 출력 공간의 하단 (실제 출력 텍스트)
-        JTextArea outputTextArea = new JTextArea();
+        JTextPane outputTextArea = new JTextPane();
         outputTextArea.setEditable(false);  // 출력 텍스트는 편집 불가
         outputTextArea.setBackground(bgColor);
         outputTextArea.setForeground(textColor);
@@ -112,7 +108,13 @@ public class IDLE {
                 outputTextArea.setText("");
                 InputOutputHandler ioHandler = new GUIIOHandler(inputField, outputTextArea);
                 CodeExcuter excuter = new CodeExcuter(ioHandler);
-                excuter.codeExecute(code);
+                new SwingWorker<Void, Void>() {
+                    @Override
+                    protected Void doInBackground() {
+                        excuter.codeExecute(code);
+                        return null;
+                    }
+                }.execute();
             }
 
             @Override
@@ -133,41 +135,77 @@ public class IDLE {
         AtomicReference<File> fileRef = new AtomicReference<>(null);
 
         item1.addActionListener(e -> {
-            JFileChooser fileChooser = new JFileChooser();
+            if (isWindows10or11()) {
+                String path = FileManager.getInstance().selectFile();
+                if (path != null) {
+                    File file = new File(path);
+                    fileRef.set(file);
+                    frame.setTitle("장구랭 - " + file.getName());
+                    try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                        String line;
+                        StringBuilder content = new StringBuilder();
 
-            // 파일 필터 추가
-            FileNameExtensionFilter filter = new FileNameExtensionFilter("JangguLang Code Files", "jangguLang");
-            fileChooser.setFileFilter(filter);
-
-            // 파일 선택 다이얼로그를 보여줍니다.
-            int result = fileChooser.showOpenDialog(frame);
-
-            // 파일을 선택했을 때 처리
-            if (result == JFileChooser.APPROVE_OPTION) {
-                File file = fileChooser.getSelectedFile();
-                fileRef.set(file);
-                frame.setTitle("장구랭 - " + file.getName());
-                try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-                    String line;
-                    StringBuilder content = new StringBuilder();
-
-                    // 파일의 모든 줄을 읽어 TextArea에 넣음
-                    while ((line = reader.readLine()) != null) {
-                        content.append(line).append("\n");
+                        // 파일의 모든 줄을 읽어 TextArea에 넣음
+                        while ((line = reader.readLine()) != null) {
+                            content.append(line).append("\n");
+                        }
+                        textArea.setText(content.toString()); // TextArea에 텍스트 설정
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
                     }
-                    textArea.setText(content.toString()); // TextArea에 텍스트 설정
-                } catch (IOException e1) {
-                    e1.printStackTrace();
+                }
+            } else {
+                JFileChooser fileChooser = new JFileChooser();
+
+                // 파일 필터 추가
+                FileNameExtensionFilter filter = new FileNameExtensionFilter("JangguLang Code Files", "jangguLang");
+                fileChooser.setFileFilter(filter);
+
+                // 파일 선택 다이얼로그를 보여줍니다.
+                int result = fileChooser.showOpenDialog(frame);
+
+                // 파일을 선택했을 때 처리
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    File file = fileChooser.getSelectedFile();
+                    fileRef.set(file);
+                    frame.setTitle("장구랭 - " + file.getName());
+                    try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                        String line;
+                        StringBuilder content = new StringBuilder();
+
+                        // 파일의 모든 줄을 읽어 TextArea에 넣음
+                        while ((line = reader.readLine()) != null) {
+                            content.append(line).append("\n");
+                        }
+                        textArea.setText(content.toString()); // TextArea에 텍스트 설정
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
                 }
             }
         });
 
         item4.addActionListener(e -> {
-            File file1 = fileRef.get();
-            File file = anotherNameSave(textArea.getText(), frame, file1);
-            if (file == null) return;
-            frame.setTitle("장구랭 - " + file.getName());
-            fileRef.set(file);
+            if (isWindows10or11()) {
+                File file1 = fileRef.get();
+                String path = null;
+                if (file1 == null) {
+                    path = FileManager.getInstance().saveFile(textArea.getText(), null);
+                } else {
+                    path = FileManager.getInstance().saveFile(textArea.getText(), file1.getName());
+                }
+                if (path != null) {
+                    File file = new File(path);
+                    frame.setTitle("장구랭 - " + file.getName());
+                    fileRef.set(file);
+                }
+            } else {
+                File file1 = fileRef.get();
+                File file = anotherNameSave(textArea.getText(), frame, file1);
+                if (file == null) return;
+                frame.setTitle("장구랭 - " + file.getName());
+                fileRef.set(file);
+            }
         });
 
         item2.addActionListener(e -> {
@@ -177,18 +215,37 @@ public class IDLE {
         });
 
         item3.addActionListener(e -> {
-            File file1 = fileRef.get();
-            if (file1 == null) {
-                File file = anotherNameSave(textArea.getText(), frame, null);
-                if (file == null) return;
-                frame.setTitle("장구랭 - " + file.getName());
-                fileRef.set(file);
+            if (isWindows10or11()) {
+                File file1 = fileRef.get();
+                if (file1 == null) {
+                    String path = FileManager.getInstance().saveFile(textArea.getText(), null);
+                    if (path != null) {
+                        File file = new File(path);
+                        frame.setTitle("장구랭 - " + file.getName());
+                        fileRef.set(file);
+                    }
+                } else {
+                    // 파일을 저장(덮어쓰기 또는 새로 생성)
+                    try (BufferedWriter writer = new BufferedWriter(new FileWriter(file1))) {
+                        writer.write(textArea.getText()); // TextArea의 내용을 파일에 저장
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                }
             } else {
-                // 파일을 저장(덮어쓰기 또는 새로 생성)
-                try (BufferedWriter writer = new BufferedWriter(new FileWriter(file1))) {
-                    writer.write(textArea.getText()); // TextArea의 내용을 파일에 저장
-                } catch (IOException ex) {
-                    ex.printStackTrace();
+                File file1 = fileRef.get();
+                if (file1 == null) {
+                    File file = anotherNameSave(textArea.getText(), frame, null);
+                    if (file == null) return;
+                    frame.setTitle("장구랭 - " + file.getName());
+                    fileRef.set(file);
+                } else {
+                    // 파일을 저장(덮어쓰기 또는 새로 생성)
+                    try (BufferedWriter writer = new BufferedWriter(new FileWriter(file1))) {
+                        writer.write(textArea.getText()); // TextArea의 내용을 파일에 저장
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
                 }
             }
         });
@@ -218,5 +275,10 @@ public class IDLE {
             return fileToSave;
         }
         return null;
+    }
+
+    public static boolean isWindows10or11() {
+        String osName = System.getProperty("os.name").toLowerCase();
+        return osName.contains("windows 10") || osName.contains("windows 11");
     }
 }
