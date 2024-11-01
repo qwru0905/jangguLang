@@ -1,5 +1,9 @@
 package org.chris.jangguLang;
 
+import org.chris.jangguLang.code.Data;
+
+import java.util.logging.Level;
+
 public class FileManager {
     private static final FileManager INSTANCE = new FileManager();
 
@@ -7,8 +11,7 @@ public class FileManager {
         try {
             System.loadLibrary("fileManager");
         } catch (Exception e) {
-            System.err.println("Native library load failed: " + e.getMessage());
-            e.printStackTrace();
+            Data.getInstance().getLogger().log(Level.SEVERE, "Native library load failed: " + e.getMessage(), e);
         }
     }
 

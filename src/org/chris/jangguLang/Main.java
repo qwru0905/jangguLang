@@ -2,13 +2,13 @@
 
 package org.chris.jangguLang;
 
+import org.chris.jangguLang.code.Data;
+
 import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Scanner;
+import java.util.logging.Level;
 
 //JangguLang 명령어 총정리
 //#### 기본 수 표현법
@@ -85,7 +85,7 @@ import java.util.Scanner;
 //이 코드에서는 얼씨구 명령어가 문자를 나타내며, 이를 쿵 명령어와 함께 사용하여 0번 스택의 값을 문자로 대체합니다. 잘한다는 반복문의 끝을 나타내며, 허먼은 반복문을 강제 종료하는 데 사용됩니다.
 
 public class Main {
-    static boolean debug = false;
+    static final boolean debug = false;
 
     public static void main(String[] args) {
         try {
@@ -121,10 +121,10 @@ public class Main {
             }
 
             InputOutputHandler ioHandler = new ConsoleIOHandler();
-            CodeExcuter executer = new CodeExcuter(ioHandler);
+            CodeExcuter executer = new CodeExcuter(ioHandler, debug);
             executer.codeExecute(list);
         } catch (Exception e) {
-            e.printStackTrace();
+            Data.getInstance().getLogger().log(Level.SEVERE, "Native library load failed: " + e.getMessage(), e);
         }
     }
 }

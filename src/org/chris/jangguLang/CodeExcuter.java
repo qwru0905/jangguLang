@@ -154,7 +154,7 @@ public class CodeExcuter extends Thread {
             } else if (line.startsWith("덩")) {
                 String line2 = line.substring(1);
 
-                Integer number = 0;
+                Integer number;
                 boolean hasOtherCharacters = false;
 
                 number = countNumber(line2);
@@ -174,10 +174,11 @@ public class CodeExcuter extends Thread {
                     ioHandler.printOutput(array.toString());
                 }
             } else if (line.startsWith("쿵")) {
+                String line2;
                 if (line.startsWith("쿵 얼씨구")) {
-                    String line2 = line.substring(5);
+                    line2 = line.substring(5);
 
-                    Integer number = 0;
+                    Integer number;
                     boolean hasOtherCharacters = false;
 
                     number = countNumber(line2);
@@ -192,13 +193,10 @@ public class CodeExcuter extends Thread {
 
                     array.set(0, (char) number.intValue());
 
-                    if (debug) {
-                        ioHandler.printOutput(array.toString());
-                    }
                 } else {
-                    String line2 = line.substring(1);
+                    line2 = line.substring(1);
 
-                    Integer number = 0;
+                    Integer number;
                     boolean hasOtherCharacters = false;
 
                     number = countNumber(line2);
@@ -213,14 +211,14 @@ public class CodeExcuter extends Thread {
 
                     array.set(0, number);
 
-                    if (debug) {
-                        ioHandler.printOutput(array.toString());
-                    }
+                }
+                if (debug) {
+                    ioHandler.printOutput(array.toString());
                 }
             } else if (line.startsWith("덕")) {
                 String line2 = line.substring(1);
 
-                Integer number = 0;
+                Integer number;
                 boolean hasOtherCharacters = false;
 
                 number = countNumber(line2);
@@ -239,7 +237,7 @@ public class CodeExcuter extends Thread {
             } else if (line.startsWith("기덕")) {
                 String line2 = line.substring(2);
 
-                Integer number = 0;
+                Integer number;
                 boolean hasOtherCharacters = false;
 
                 number = countNumber(line2);
@@ -476,5 +474,10 @@ public class CodeExcuter extends Thread {
             return str.substring(0, index).trim();  // "//" 이전 부분만 자르고 공백 제거
         }
         return str;  // "//"가 없을 경우 원본 문자열 반환
+    }
+
+    @Override
+    public void run() {
+
     }
 }

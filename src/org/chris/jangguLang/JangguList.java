@@ -37,6 +37,7 @@ public class JangguList {
         return isCharList.get(index);
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public Object set(int index, Object element) {
         checkAndExpandSize(index);
         Object oldElement = isCharList.get(index) ? charList.get(index) : intList.get(index);

@@ -1,14 +1,17 @@
 package org.chris.jangguLang;
 
+import org.chris.jangguLang.code.Data;
+
 import javax.swing.*;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import java.awt.*;
+import java.util.logging.Level;
 
 public class GUIIOHandler extends Thread implements InputOutputHandler {
-    private JTextField inputField;
-    private JTextPane outputArea; // JTextArea 대신 JTextPane 사용
+    private final JTextField inputField;
+    private final JTextPane outputArea; // JTextArea 대신 JTextPane 사용
     private volatile String input = null;
 
     public GUIIOHandler(JTextField inputField, JTextPane outputArea) {
@@ -37,7 +40,7 @@ public class GUIIOHandler extends Thread implements InputOutputHandler {
             // 이전 메시지와 연결하여 한 줄로 이어 붙입니다.
             doc.insertString(doc.getLength(), message, style);
         } catch (Exception e) {
-            e.printStackTrace();
+            Data.getInstance().getLogger().log(Level.SEVERE, "Native library load failed: " + e.getMessage(), e);
         }
     }
 
@@ -54,5 +57,10 @@ public class GUIIOHandler extends Thread implements InputOutputHandler {
     @Override
     public void printOutput(String output) {
         appendOutput(output, Color.WHITE); // 기본 출력은 검정색으로
+    }
+
+    @Override
+    public void run() {
+
     }
 }

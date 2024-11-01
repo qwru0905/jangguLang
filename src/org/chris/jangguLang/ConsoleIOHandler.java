@@ -3,7 +3,7 @@ package org.chris.jangguLang;
 import java.util.Scanner;
 
 public class ConsoleIOHandler implements InputOutputHandler {
-    private Scanner sc = new Scanner(System.in);
+    private final Scanner sc = new Scanner(System.in);
 
     @Override
     public String getInput() {

@@ -1,5 +1,7 @@
 package org.chris.jangguLang;
 
+import org.chris.jangguLang.code.Data;
+
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
@@ -7,6 +9,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
 
 public class IDLE {
 
@@ -134,10 +137,7 @@ public class IDLE {
             }
         });
 
-        // JMenuItem item1 = new JMenuItem("열기");
-        // JMenuItem item2 = new JMenuItem("새 파일");
-        // JMenuItem item3 = new JMenuItem("저장");
-        // JMenuItem item4 = new JMenuItem("다른 이름으로 저장");
+        // 열기, 새 파일, 저장, 다른 이름으로 저장
         AtomicReference<File> fileRef = new AtomicReference<>(null);
 
         item1.addActionListener(e -> {
@@ -157,7 +157,7 @@ public class IDLE {
                         }
                         textArea.setText(content.toString()); // TextArea에 텍스트 설정
                     } catch (IOException e1) {
-                        e1.printStackTrace();
+                        Data.getInstance().getLogger().log(Level.SEVERE, "Native library load failed: " + e1.getMessage(), e1);
                     }
                 }
             } else {
@@ -185,7 +185,7 @@ public class IDLE {
                         }
                         textArea.setText(content.toString()); // TextArea에 텍스트 설정
                     } catch (IOException e1) {
-                        e1.printStackTrace();
+                        Data.getInstance().getLogger().log(Level.SEVERE, "Native library load failed: " + e1.getMessage(), e1);
                     }
                 }
             }
@@ -194,7 +194,7 @@ public class IDLE {
         item4.addActionListener(e -> {
             if (isWindows10or11()) {
                 File file1 = fileRef.get();
-                String path = null;
+                String path;
                 if (file1 == null) {
                     path = FileManager.getInstance().saveFile(textArea.getText(), null);
                 } else {
@@ -235,7 +235,7 @@ public class IDLE {
                     try (BufferedWriter writer = new BufferedWriter(new FileWriter(file1))) {
                         writer.write(textArea.getText()); // TextArea의 내용을 파일에 저장
                     } catch (IOException ex) {
-                        ex.printStackTrace();
+                        Data.getInstance().getLogger().log(Level.SEVERE, "Native library load failed: " + ex.getMessage(), ex);
                     }
                 }
             } else {
@@ -250,7 +250,7 @@ public class IDLE {
                     try (BufferedWriter writer = new BufferedWriter(new FileWriter(file1))) {
                         writer.write(textArea.getText()); // TextArea의 내용을 파일에 저장
                     } catch (IOException ex) {
-                        ex.printStackTrace();
+                        Data.getInstance().getLogger().log(Level.SEVERE, "Native library load failed: " + ex.getMessage(), ex);
                     }
                 }
             }
@@ -276,7 +276,7 @@ public class IDLE {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileToSave))) {
                 writer.write(code); // TextArea의 내용을 파일에 저장
             } catch (IOException ex) {
-                ex.printStackTrace();
+                Data.getInstance().getLogger().log(Level.SEVERE, "Native library load failed: " + ex.getMessage(), ex);
             }
             return fileToSave;
         }
