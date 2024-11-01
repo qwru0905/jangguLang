@@ -9,6 +9,7 @@ import java.io.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class IDLE {
+
     public static void main(String[] args) {
         // JFrame 생성
         JFrame frame = new JFrame("장구랭");
@@ -101,17 +102,22 @@ public class IDLE {
         // 컴포넌트 배치
         frame.add(splitPane, BorderLayout.CENTER);
 
+        InputOutputHandler ioHandler = new GUIIOHandler(inputField, outputTextArea);
+        CodeExcuter excuter = new CodeExcuter(ioHandler);
+
         codeStartMenu.addMenuListener(new MenuListener() {
             @Override
             public void menuSelected(MenuEvent e) {
                 String code = textArea.getText();
                 outputTextArea.setText("");
-                InputOutputHandler ioHandler = new GUIIOHandler(inputField, outputTextArea);
-                CodeExcuter excuter = new CodeExcuter(ioHandler);
                 new SwingWorker<Void, Void>() {
                     @Override
                     protected Void doInBackground() {
-                        excuter.codeExecute(code);
+                        if (excuter.isAlive()) {
+                            excuter.restartExecution(code);
+                        } else {
+                            excuter.codeExecute(code);
+                        }
                         return null;
                     }
                 }.execute();

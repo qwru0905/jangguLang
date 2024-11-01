@@ -3,8 +3,29 @@ package org.chris.jangguLang;
 import java.util.List;
 
 public class CodeExcuter extends Thread {
-    private InputOutputHandler ioHandler;
+    private final InputOutputHandler ioHandler;
     private final boolean debug;
+    private final JangguList array = new JangguList();
+    private volatile boolean stopRequested = false;
+
+    public void requestStop() {
+        stopRequested = true;
+        this.interrupt();  // 중단 신호 전달
+    }
+
+    public void restartExecution(String code) {
+        if (isAlive()) {
+            requestStop();
+            try {
+                join();  // 스레드가 종료될 때까지 대기
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+        stopRequested = false;  // 플래그 재설정
+        start();  // 스레드 다시 시작
+        codeExecute(code);
+    }
     
     public CodeExcuter(InputOutputHandler ioHandler) {
         this.ioHandler = ioHandler;
@@ -22,9 +43,8 @@ public class CodeExcuter extends Thread {
     }
 
     public void codeExecute(List<String> list) {
-        JangguList array = new JangguList();
-
         for (int i = 0; i < list.size(); i++) {
+            if (stopRequested) return;
             String line = list.get(i);
             line = removeComment(line);
 
@@ -32,12 +52,12 @@ public class CodeExcuter extends Thread {
                 if (line.startsWith("더러러러 ")) {
                     String line2 = line.substring(5);
 
-                    int exclamationsBefore = 0;
-                    int exclamationsAfter = 0;
+                    Integer exclamationsBefore = 0;
+                    Integer exclamationsAfter = 0;
                     boolean hasOtherCharacters = false;
 
                     // 문자열을 '~'로 분리
-                    String[] parts = line2.split("~");
+                    String[] parts = line2.split("-");
 
                     if (parts.length > 2) {
                         hasOtherCharacters = true;
@@ -45,14 +65,14 @@ public class CodeExcuter extends Thread {
 
                     if (parts.length > 0) {
                         exclamationsBefore = countNumber(parts[0]);
-                        if (exclamationsBefore == -1) {
+                        if (exclamationsBefore == null) {
                             hasOtherCharacters = true;
                         }
                     }
 
                     if (parts.length > 1) {
                         exclamationsAfter = countNumber(parts[1]);
-                        if (exclamationsAfter == -1) {
+                        if (exclamationsAfter == null) {
                             hasOtherCharacters = true;
                         }
                     }
@@ -85,12 +105,12 @@ public class CodeExcuter extends Thread {
                 if (line.startsWith("아나리 ")) {
                     String line2 = line.substring(4);
 
-                    int exclamationsBefore = 0;
-                    int exclamationsAfter = 0;
+                    Integer exclamationsBefore = 0;
+                    Integer exclamationsAfter = 0;
                     boolean hasOtherCharacters = false;
 
                     // 문자열을 '~'로 분리
-                    String[] parts = line2.split("~");
+                    String[] parts = line2.split("-");
 
                     if (parts.length > 2) {
                         hasOtherCharacters = true;
@@ -98,14 +118,14 @@ public class CodeExcuter extends Thread {
 
                     if (parts.length > 0) {
                         exclamationsBefore = countNumber(parts[0]);
-                        if (exclamationsBefore == -1) {
+                        if (exclamationsBefore == null) {
                             hasOtherCharacters = true;
                         }
                     }
 
                     if (parts.length > 1) {
                         exclamationsAfter = countNumber(parts[1]);
-                        if (exclamationsAfter == -1) {
+                        if (exclamationsAfter == null) {
                             hasOtherCharacters = true;
                         }
                     }
@@ -134,11 +154,11 @@ public class CodeExcuter extends Thread {
             } else if (line.startsWith("덩")) {
                 String line2 = line.substring(1);
 
-                int number = 0;
+                Integer number = 0;
                 boolean hasOtherCharacters = false;
 
                 number = countNumber(line2);
-                if (number == -1) {
+                if (number == null) {
                     hasOtherCharacters = true;
                 }
 
@@ -155,39 +175,34 @@ public class CodeExcuter extends Thread {
                 }
             } else if (line.startsWith("쿵")) {
                 if (line.startsWith("쿵 얼씨구")) {
-                    if (line.startsWith("쿵 얼씨구 ")) {
-                        String line2 = line.substring(5);
+                    String line2 = line.substring(5);
 
-                        int number = 0;
-                        boolean hasOtherCharacters = false;
+                    Integer number = 0;
+                    boolean hasOtherCharacters = false;
 
-                        number = countNumber(line2);
-                        if (number == -1) {
-                            hasOtherCharacters = true;
-                        }
+                    number = countNumber(line2);
+                    if (number == null) {
+                        hasOtherCharacters = true;
+                    }
 
-                        if (hasOtherCharacters) {
-                            ioHandler.printOutput("Invalid command: " + line);
-                            return;
-                        }
-
-                        array.set(0, (char) number);
-
-                        if (debug) {
-                            ioHandler.printOutput(array.toString());
-                        }
-                    } else {
+                    if (hasOtherCharacters) {
                         ioHandler.printOutput("Invalid command: " + line);
                         return;
+                    }
+
+                    array.set(0, (char) number.intValue());
+
+                    if (debug) {
+                        ioHandler.printOutput(array.toString());
                     }
                 } else {
                     String line2 = line.substring(1);
 
-                    int number = 0;
+                    Integer number = 0;
                     boolean hasOtherCharacters = false;
 
                     number = countNumber(line2);
-                    if (number == -1) {
+                    if (number == null) {
                         hasOtherCharacters = true;
                     }
 
@@ -205,11 +220,11 @@ public class CodeExcuter extends Thread {
             } else if (line.startsWith("덕")) {
                 String line2 = line.substring(1);
 
-                int number = 0;
+                Integer number = 0;
                 boolean hasOtherCharacters = false;
 
                 number = countNumber(line2);
-                if (number == -1) {
+                if (number == null) {
                     hasOtherCharacters = true;
                 }
 
@@ -224,11 +239,11 @@ public class CodeExcuter extends Thread {
             } else if (line.startsWith("기덕")) {
                 String line2 = line.substring(2);
 
-                int number = 0;
+                Integer number = 0;
                 boolean hasOtherCharacters = false;
 
                 number = countNumber(line2);
-                if (number == -1) {
+                if (number == null) {
                     hasOtherCharacters = true;
                 }
 
@@ -244,11 +259,11 @@ public class CodeExcuter extends Thread {
             } else if (line.startsWith("얼쑤")) {
                 String line2 = line.substring(2);
 
-                int number = 0;
+                Integer number;
                 boolean hasOtherCharacters = false;
 
                 number = countNumber(line2);
-                if (number == -1) {
+                if (number == null) {
                     hasOtherCharacters = true;
                 }
 
@@ -297,33 +312,158 @@ public class CodeExcuter extends Thread {
                         break;
                     }
                 }
+            } else if (line.startsWith("더해라")) {
+                if (line.startsWith("더해라 ")) {
+                    String line2 = line.substring(4);
+
+                    Integer firstIndex = 0;
+                    Integer secondIndex = 0;
+                    boolean hasOtherCharacters = false;
+
+                    // 문자열을 '~'로 분리
+                    String[] parts = line2.split("-");
+
+                    if (parts.length > 2) {
+                        hasOtherCharacters = true;
+                    }
+
+                    if (parts.length > 0) {
+                        firstIndex = countNumber(parts[0]);
+                        if (firstIndex == null) {
+                            hasOtherCharacters = true;
+                        }
+                    }
+
+                    if (parts.length > 1) {
+                        secondIndex = countNumber(parts[1]);
+                        if (secondIndex == null) {
+                            hasOtherCharacters = true;
+                        }
+                    }
+
+                    if (hasOtherCharacters) {
+                        ioHandler.printOutput("Invalid command: " + line);
+                        return;
+                    }
+
+                    if (debug) {
+                        ioHandler.printOutput("~ 앞에 있는 !의 개수: " + firstIndex);
+                        ioHandler.printOutput("~ 뒤에 있는 !의 개수: " + secondIndex);
+                    }
+
+                    if (array.isIndexChar(firstIndex) || array.isIndexChar(secondIndex)) {
+                        ioHandler.printOutput("It can't be char: " + line);
+                        return;
+                    }
+
+                    int firstIndexNumber = (int) array.get(firstIndex);
+                    int secondIndexNumber = (int) array.get(secondIndex);
+                    array.set(0, firstIndexNumber + secondIndexNumber);
+                } else {
+                    ioHandler.printOutput("Invalid command: " + line);
+                    return;
+                }
+            } else if (line.startsWith("빼라")) {
+                if (line.startsWith("빼라 ")) {
+                    String line2 = line.substring(3);
+
+                    Integer firstIndex = 0;
+                    Integer secondIndex = 0;
+                    boolean hasOtherCharacters = false;
+
+                    // 문자열을 '~'로 분리
+                    String[] parts = line2.split("-");
+
+                    if (parts.length > 2) {
+                        hasOtherCharacters = true;
+                    }
+
+                    if (parts.length > 0) {
+                        firstIndex = countNumber(parts[0]);
+                        if (firstIndex == null) {
+                            hasOtherCharacters = true;
+                        }
+                    }
+
+                    if (parts.length > 1) {
+                        secondIndex = countNumber(parts[1]);
+                        if (secondIndex == null) {
+                            hasOtherCharacters = true;
+                        }
+                    }
+
+                    if (hasOtherCharacters) {
+                        ioHandler.printOutput("Invalid command: " + line);
+                        return;
+                    }
+
+                    if (debug) {
+                        ioHandler.printOutput("~ 앞에 있는 !의 개수: " + firstIndex);
+                        ioHandler.printOutput("~ 뒤에 있는 !의 개수: " + secondIndex);
+                    }
+
+                    if (array.isIndexChar(firstIndex) || array.isIndexChar(secondIndex)) {
+                        ioHandler.printOutput("It can't be char: " + line);
+                        return;
+                    }
+
+                    int firstIndexNumber = (int) array.get(firstIndex);
+                    int secondIndexNumber = (int) array.get(secondIndex);
+                    array.set(0, firstIndexNumber - secondIndexNumber);
+                } else {
+                    ioHandler.printOutput("Invalid command: " + line);
+                    return;
+                }
             }
         }
+        requestStop();
     }
 
-    public static int countNumber(String s) {
+    public Integer countNumber(String s) {
         int number = 0;
         if (s.startsWith(" 좋") && s.endsWith("다")) {
             s = s.substring(2, s.length() - 1);
             String[] parts = s.split(" ");
-            for (String part : parts) {
+            boolean isNumberMinus = false;
+            for (int i = 0; i < parts.length; i++) {
+                String part = parts[i];
+                if (i == 0 && part.equals("~")) {
+                    isNumberMinus = true;
+                }
                 number *= 10;
                 if (!part.equals("~")) {
                     for (char c : part.toCharArray()) {
                         if (c == '!') {
                             number++;
                         } else {
-                            return -1;
+                            return null;
                         }
                     }
                 }
             }
+            if (isNumberMinus) {
+                number = -number;
+            }
+        } else if (s.startsWith(" 기")) {
+            s = s.substring(2);
+            for (char c : s.toCharArray()) {
+                if (c == '!') {
+                    number++;
+                } else if (c == '~') {
+                    number--;
+                } else {
+                    return null;
+                }
+            }
+            return array.isIndexChar(number) ? null : (int) array.get(number);
         } else {
             for (char c : s.toCharArray()) {
                 if (c == '!') {
                     number++;
+                } else if (c == '~') {
+                    number--;
                 } else {
-                    return -1;
+                    return null;
                 }
             }
         }
